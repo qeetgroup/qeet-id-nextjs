@@ -46,8 +46,11 @@ export function createRouteHandlers(config: Config, store: SessionStore, oidc: O
     if (route === undefined) {
       return errorResponse(404, "not_found", `No Qeet ID session route answers ${url.pathname}. The routes live under ${config.basePath}.`);
     }
+    // Exact methods only: Next.js answers HEAD with GET's handler, and a HEAD
+    // to the callback (a link scanner, say) would redeem the code, so the
+    // browser's own GET would present it twice and Qeet ID would end the grant.
     const method = route === "signOut" || route === "switchOrganization" ? "POST" : "GET";
-    if (request.method !== method && !(method === "GET" && request.method === "HEAD")) {
+    if (request.method !== method) {
       return errorResponse(405, "method_not_allowed", `${url.pathname} answers ${method} only.`, { allow: method });
     }
     const cookies = parseCookieHeader(request.headers.get("cookie"));

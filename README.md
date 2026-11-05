@@ -10,7 +10,7 @@
 [![OpenID Connect](https://img.shields.io/badge/OpenID%20Connect-code%20%2B%20PKCE-F78C40?logo=openid&logoColor=white)](#-how-sign-in-works)
 [![Tokens](https://img.shields.io/badge/tokens-server%20only-2EA043)](#-sessions-and-cookies)
 [![ES module](https://img.shields.io/badge/modules-ESM-F7DF1E)](#-typescript-and-modules)
-[![Tests](https://img.shields.io/badge/tests-128%20passing-2EA043)](test)
+[![Tests](https://img.shields.io/badge/tests-129%20passing-2EA043)](test)
 
 [🌐 Qeet ID](https://id.qeet.in) · [📖 Docs](https://docs.qeet.in) · [🚀 Quick start](#-quick-start) · [⚛️ React SDK](https://github.com/qeetgroup/qeet-id-react) · [🟢 Node SDK](https://github.com/qeetgroup/qeet-id-node) · [📝 Changelog](CHANGELOG.md)
 

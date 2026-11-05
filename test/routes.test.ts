@@ -380,6 +380,18 @@ describe("routing", () => {
     expect(signOut.headers.get("allow")).toBe("POST");
   });
 
+  it("answers HEAD with 405, so nothing but the browser's GET redeems a code", async () => {
+    const jar = new CookieJar();
+    const start = await qeetId.handlers.GET(get("/auth/sign-in", jar));
+    jar.take(start);
+    const callbackUrl = qeet.authorize(start.headers.get("location") ?? "");
+    const head = await qeetId.handlers.GET(new Request(callbackUrl, { method: "HEAD", headers: { cookie: jar.header() } }));
+    expect(head.status).toBe(405);
+    expect(qeet.callsTo("POST /v1/oauth/token-code")).toHaveLength(0);
+    const response = await qeetId.handlers.GET(new Request(callbackUrl, { headers: { cookie: jar.header() } }));
+    expect(response.headers.get("location")).toBe(`${APP_URL}/`);
+  });
+
   it("answers 404 for a path that isn't a session route", async () => {
     const response = await qeetId.handlers.GET(get("/auth/nope"));
     expect(response.status).toBe(404);
