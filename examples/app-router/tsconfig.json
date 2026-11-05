@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // As a Next.js app has it, with the package pointed at this repository's source.
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "strict": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@qeet-id/nextjs": ["../../src/index.ts"],
+      "@qeet-id/nextjs/client": ["../../src/client/index.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
