@@ -38,11 +38,11 @@ const OAUTH_ERROR_CODE = /^[a-z_]{1,64}$/;
 export function createRouteHandlers(config: Config, store: SessionStore, oidc: Oidc): RouteHandlers {
   const byPath = new Map<string, RouteName>(Object.entries(config.routes).map(([name, path]) => [path, name as RouteName]));
   // The callback answers at the redirect URI's path, which may differ from {basePath}/callback behind a rewrite.
-  byPath.set(config.callbackPath.replace(/\/+$/, "") || "/", "callback");
+  byPath.set(trimTrailingSlashes(config.callbackPath) || "/", "callback");
 
   async function handle(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    const route = byPath.get(url.pathname.replace(/\/+$/, "") || "/");
+    const route = byPath.get(trimTrailingSlashes(url.pathname) || "/");
     if (route === undefined) {
       return errorResponse(404, "not_found", `No Qeet ID session route answers ${url.pathname}. The routes live under ${config.basePath}.`);
     }
@@ -255,4 +255,15 @@ export function serializeCookie({ name, value, attributes }: CookieWrite): strin
   parts.push("HttpOnly", "SameSite=Lax");
   if (attributes.secure) parts.push("Secure");
   return parts.join("; ");
+}
+
+/**
+ * Removes the trailing slashes from a URL or path, in linear time. It replaces
+ * `value.replace(/\/+$/, "")`, whose backtracking turns quadratic on a string
+ * of many slashes that don't end it (a slow-regex denial of service).
+ */
+export function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value.charCodeAt(end - 1) === 47) end--;
+  return end === value.length ? value : value.slice(0, end);
 }

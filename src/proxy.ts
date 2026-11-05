@@ -9,7 +9,7 @@ import type { Config } from "./config.js";
 import { type CookieWrite, applyWrites, cookieHeader } from "./session/cookies.js";
 import type { SessionStore } from "./session/store.js";
 import type { Oidc } from "./oidc.js";
-import { serializeCookie } from "./routes.js";
+import { serializeCookie, trimTrailingSlashes } from "./routes.js";
 
 /**
  * The request header the proxy sets to the path and query being visited, for
@@ -93,7 +93,7 @@ export function protectedPaths(protect: ProxyOptions["protect"]): (request: Next
   const prefixes = protect.map((prefix) => {
     if (typeof prefix !== "string" || !prefix.startsWith("/"))
       throw new TypeError(`protect lists paths such as "/dashboard"; got ${JSON.stringify(prefix)}.`);
-    return prefix.replace(/\/+$/, "");
+    return trimTrailingSlashes(prefix);
   });
   return (request) => {
     const path = request.nextUrl.pathname;
