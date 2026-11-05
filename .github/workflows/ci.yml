@@ -35,8 +35,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - uses: ./.github/actions/link-qeet-id-packages
-
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
       - run: bun run build

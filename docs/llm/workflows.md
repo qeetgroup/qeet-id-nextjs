@@ -6,9 +6,6 @@
 ## Set up
 
 ```bash
-# once, until @qeet-id/node and @qeet-id/react are on npm: in a clone of each
-bun install && bun run build && bun link
-# here
 bun install
 bun run verify   # typecheck (and the example) + Biome + tests + build + publint + attw
 ```
@@ -19,7 +16,7 @@ No services required — tests use a fake Qeet ID.
 
 ```text
 1  read qeet-id-react's docs/session-contract.md and src/contract.ts (the new version)
-2  rebuild and relink @qeet-id/react; bun run typecheck shows what moved
+2  raise @qeet-id/react to the version with the change; bun run typecheck shows what moved
 3  src/routes.ts for routes, JSON and errors; src/session/store.ts (toSession) for the Session
 4  test/routes.test.ts: a test per changed behaviour
 5  README (the routes table), CHANGELOG
@@ -47,14 +44,14 @@ cleared, signing everyone out. Keep `test/session/` green and add the case.
 ## Release
 
 ```text
-1  @qeet-id/node and @qeet-id/react are on npm
-2  remove package.json "resolutions" and .github/actions/link-qeet-id-packages (and its steps); bun install
+1  CHANGELOG.md: move [Unreleased] under the version being released
+2  bun run verify
 3  open a pull request from develop into main: version.yml bumps the patch in package.json on the
    PR branch (to release a minor or major, set the version in package.json yourself)
 4  merge it: release.yml sees a version npm does not have, runs the gate, publishes to npm with
    provenance, then tags vX.Y.Z and opens a GitHub Release
 ```
 
-Until step 2, `release.yml` waits and publishes nothing. A push whose version is already on npm
+A push whose version is already on npm
 releases nothing, so re-running is safe. A bad release is not unpublished: `rollback.yml` points
 `latest` back at a good version, then release a fix.

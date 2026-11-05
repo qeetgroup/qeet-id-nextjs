@@ -43,7 +43,7 @@
 | **Fake Qeet ID** | `test/helpers/fake-qeet-id.ts` |
 | A browser's cookie jar, sign-in helper | `test/helpers/browser.ts` |
 | Example app | `examples/app-router/` (type-checked) |
-| CI | `.github/workflows/{ci,lint,security,codeql,release}.yml`; `.github/actions/link-qeet-id-packages/` |
+| CI | `.github/workflows/{ci,lint,security,codeql,version,release,rollback}.yml` |
 
 ## Decisions
 

@@ -14,7 +14,7 @@ repository:
   product: qeet-id
   type: sdk
   role: sdk
-  status: development        # not yet published to npm
+  status: active
   visibility: public
   default_branch: main
 
@@ -77,8 +77,7 @@ commands:
 ci:
   workflows: [ci.yml, codeql.yml, lint.yml, release.yml, rollback.yml, security.yml, version.yml]
   matrix: ["22", "24", "26"]
-  unpublished_dependencies: .github/actions/link-qeet-id-packages builds and bun-links @qeet-id/node and @qeet-id/react (package.json resolutions)
-  release: PR into main -> version.yml bumps the package.json patch; push main -> wait while linked -> version not on npm -> gate -> npm publish --provenance -> tag vX.Y.Z + GitHub release
+  release: PR into main -> version.yml bumps the package.json patch; push main -> version not on npm -> gate -> npm publish --provenance -> tag vX.Y.Z + GitHub release
 
 security:
   sensitive_paths:
