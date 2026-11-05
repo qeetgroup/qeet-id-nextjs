@@ -75,10 +75,10 @@ commands:
   test:    bun run test
 
 ci:
-  workflows: [ci.yml, codeql.yml, lint.yml, release.yml, security.yml]
+  workflows: [ci.yml, codeql.yml, lint.yml, release.yml, rollback.yml, security.yml, version.yml]
   matrix: ["22", "24", "26"]
   unpublished_dependencies: .github/actions/link-qeet-id-packages builds and bun-links @qeet-id/node and @qeet-id/react (package.json resolutions)
-  release: workflow_dispatch on main -> refuse while linked -> bump package.json -> gate -> npm publish --provenance -> tag vX.Y.Z
+  release: PR into main -> version.yml bumps the package.json patch; push main -> wait while linked -> version not on npm -> gate -> npm publish --provenance -> tag vX.Y.Z + GitHub release
 
 security:
   sensitive_paths:

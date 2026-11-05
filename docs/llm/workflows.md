@@ -49,6 +49,12 @@ cleared, signing everyone out. Keep `test/session/` green and add the case.
 ```text
 1  @qeet-id/node and @qeet-id/react are on npm
 2  remove package.json "resolutions" and .github/actions/link-qeet-id-packages (and its steps); bun install
-3  develop → main by pull request
-4  Actions › Release › Run workflow on main, choosing patch, minor or major
+3  open a pull request from develop into main: version.yml bumps the patch in package.json on the
+   PR branch (to release a minor or major, set the version in package.json yourself)
+4  merge it: release.yml sees a version npm does not have, runs the gate, publishes to npm with
+   provenance, then tags vX.Y.Z and opens a GitHub Release
 ```
+
+Until step 2, `release.yml` waits and publishes nothing. A push whose version is already on npm
+releases nothing, so re-running is safe. A bad release is not unpublished: `rollback.yml` points
+`latest` back at a good version, then release a fix.
