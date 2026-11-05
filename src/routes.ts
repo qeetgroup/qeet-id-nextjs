@@ -38,7 +38,7 @@ const OAUTH_ERROR_CODE = /^[a-z_]{1,64}$/;
 export function createRouteHandlers(config: Config, store: SessionStore, oidc: Oidc): RouteHandlers {
   const byPath = new Map<string, RouteName>(Object.entries(config.routes).map(([name, path]) => [path, name as RouteName]));
   // The callback answers at the redirect URI's path, which may differ from {basePath}/callback behind a rewrite.
-  byPath.set(config.callbackPath, "callback");
+  byPath.set(config.callbackPath.replace(/\/+$/, "") || "/", "callback");
 
   async function handle(request: Request): Promise<Response> {
     const url = new URL(request.url);
