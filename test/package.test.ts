@@ -27,13 +27,15 @@ describe("the package", () => {
     );
   });
 
-  it("marks the server entry server-only and the client entry a client boundary", () => {
+  it("marks the server entry server-only and the provider a client boundary", () => {
     expect(readFileSync(new URL("../src/index.ts", import.meta.url), "utf8")).toMatch(/^import "server-only";$/m);
-    expect(readFileSync(new URL("../src/client/index.tsx", import.meta.url), "utf8")).toMatch(/^"use client";\n/);
+    expect(readFileSync(new URL("../src/client/provider.tsx", import.meta.url), "utf8")).toMatch(/^"use client";\n/);
+    // The entry itself stays a plain module, as @qeet-id/react's does.
+    expect(readFileSync(new URL("../src/client/index.ts", import.meta.url), "utf8")).not.toMatch(/^"use client";$/m);
   });
 
-  it.runIf(existsSync(new URL("../dist/client/index.mjs", import.meta.url)))("keeps both boundaries in the build", () => {
-    expect(readFileSync(new URL("../dist/client/index.mjs", import.meta.url), "utf8")).toMatch(/^"use client";\n/);
+  it.runIf(existsSync(new URL("../dist/client/provider.mjs", import.meta.url)))("keeps both boundaries in the build", () => {
+    expect(readFileSync(new URL("../dist/client/provider.mjs", import.meta.url), "utf8")).toMatch(/^"use client";\n/);
     expect(readFileSync(new URL("../dist/index.mjs", import.meta.url), "utf8")).toContain('import "server-only";');
   });
 
