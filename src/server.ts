@@ -2,8 +2,8 @@
  * Reading the session in Server Components, Server Actions and Route
  * Handlers, through `next/headers`.
  */
-import { cookies, headers } from "next/headers.js";
-import { redirect } from "next/navigation.js";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import { type Session, safeReturnTo } from "@qeet-id/react/contract";
 import type { Config } from "./config.js";

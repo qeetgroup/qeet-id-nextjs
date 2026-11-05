@@ -38,7 +38,7 @@
 | --- | --- |
 | Scripts | `package.json` |
 | Build config | `tsdown.config.ts` — ES module, one file per module, declarations, target node22 |
-| Compiler config | `tsconfig.json` (`nodenext`, strict, `isolatedDeclarations`); `examples/app-router/tsconfig.json` (a Next.js app's settings) |
+| Compiler config | `tsconfig.json` (bundler resolution, strict, `isolatedDeclarations`); `examples/app-router/tsconfig.json` (a Next.js app's settings) |
 | Tests | `test/` — vitest |
 | **Fake Qeet ID** | `test/helpers/fake-qeet-id.ts` |
 | A browser's cookie jar, sign-in helper | `test/helpers/browser.ts` |

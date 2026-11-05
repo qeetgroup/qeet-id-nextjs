@@ -3,8 +3,10 @@
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    // Only Next.js's bundler loads this package, and it resolves next/headers
+    // and next/navigation by their bare names (next has no exports map).
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "types": ["node"],
     "strict": true,

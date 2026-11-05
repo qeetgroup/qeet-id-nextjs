@@ -3,7 +3,7 @@
  * ahead of expiry, where the cookie can be written, and sends signed-out
  * visitors of protected paths to sign in.
  */
-import { NextResponse, type NextRequest } from "next/server.js";
+import { NextResponse, type NextRequest } from "next/server";
 import type { ErrorResponse } from "@qeet-id/react/contract";
 import type { Config } from "./config.js";
 import { type CookieWrite, applyWrites, cookieHeader } from "./session/cookies.js";

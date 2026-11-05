@@ -12,7 +12,7 @@ vi.mock("@qeet-id/react", () => ({
   useSession: () => ({ session: null }),
 }));
 
-vi.mock("next/navigation.js", () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: seen.refresh }),
 }));
 

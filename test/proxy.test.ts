@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server.js";
+import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { APP_URL, CookieJar, signIn, testQeetID } from "./helpers/browser.js";
 import { type FakeQeetID, fakeQeetID } from "./helpers/fake-qeet-id.js";

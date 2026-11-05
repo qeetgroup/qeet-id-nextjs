@@ -12,7 +12,7 @@ const request = vi.hoisted(() => ({
   sets: [] as { name: string; value: string; options: unknown }[],
 }));
 
-vi.mock("next/headers.js", () => ({
+vi.mock("next/headers", () => ({
   cookies: async () => ({
     getAll: () => [...request.cookies].map(([name, value]) => ({ name, value })),
     set(name: string, value: string, options?: { maxAge?: number }) {
@@ -25,7 +25,7 @@ vi.mock("next/headers.js", () => ({
   headers: async () => request.headers,
 }));
 
-vi.mock("next/navigation.js", () => ({
+vi.mock("next/navigation", () => ({
   redirect(url: string): never {
     throw Object.assign(new Error("NEXT_REDIRECT"), { url });
   },

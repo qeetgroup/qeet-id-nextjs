@@ -1,7 +1,7 @@
 "use client";
 
 import { QeetIDProvider as ReactQeetIDProvider, type QeetIDProviderProps } from "@qeet-id/react";
-import { useRouter } from "next/navigation.js";
+import { useRouter } from "next/navigation";
 import { type JSX, useCallback } from "react";
 
 /**
