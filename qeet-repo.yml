@@ -1,0 +1,98 @@
+# qeet-id-nextjs — repository context metadata (Level 2).
+# Inherits qeetgroup/qeet-context (L0) and qeetgroup/qeet-id-context (L1).
+
+schema_version: 1
+
+context: {type: repository, level: L2, canonical: true, last_verified: "2026-11-05"}
+
+inheritance:
+  organization: {repository: qeetgroup/qeet-context, level: L0}
+  product:      {repository: qeetgroup/qeet-id-context, level: L1}
+
+repository:
+  name: qeet-id-nextjs
+  product: qeet-id
+  type: sdk
+  role: sdk
+  status: development        # not yet published to npm
+  visibility: public
+  default_branch: main
+
+runtime:
+  language: TypeScript
+  typescript: "7"
+  node: ">=22.12.0"          # tested on 22, 24 and 26; .nvmrc pins 24
+  framework: "next ^16 (App Router), react ^19 — peers"
+  package_manager: bun@1.4.3
+  lint_format: biome
+  runtime_deps: ["@qeet-id/node", "@qeet-id/react", server-only]
+  build: tsdown              # ES module only (.mjs/.d.mts), one file per module (ADR-0004)
+
+module: {name: "@qeet-id/nextjs", version: "0.1.0", entries: [".", "./client"]}
+
+architecture:
+  factory: createQeetID              # env QEET_ID_* + options -> handlers, proxy, getSession, requireSession, getAccessToken
+  routes: one catch-all Route Handler under basePath (ADR-0001)
+  session: AES-256-GCM sealed cookie, no server store (ADR-0002)
+  renewal: only where the cookie can be written; single-flight per refresh token (ADR-0003)
+  packaging: esm-only                # ADR-0004
+  boundaries: {server: "server-only on src/index.ts", client: "\"use client\" on src/client/provider.tsx only"}
+
+contracts:
+  implements:
+    contract: session-contract
+    owner: qeetgroup/qeet-id-react
+    documents: [docs/session-contract.md, src/contract.ts]
+    import: "@qeet-id/react/contract"
+  consumes:
+    api: qeet-id-server
+    documents: [api/openapi/federation.yaml, api/openapi/auth.yaml, api/openapi/management.yaml]
+    tiebreaker: internal/federation/oidc/
+    base_url: https://api.id.qeet.in
+    through: "@qeet-id/node"
+  oauth_client: confidential, client_secret_post, authorization_code + PKCE S256, refresh_token
+  routes: [sign-in, sign-up, callback, session, sign-out, switch-organization]
+  csrf_header: "X-Qeet-ID-Request: 1"
+
+defaults:
+  base_path: /auth
+  scopes: openid profile email offline_access
+  session_max_age_seconds: 604800
+  renewal_margin_seconds: 60
+  renewal_reuse_seconds: 30
+  sign_in_cookie_max_age_seconds: 600
+  cookie_chunk_characters: 3800
+  qeet_id_timeout_ms: 10000
+
+env:
+  required: [QEET_ID_CLIENT_ID, QEET_ID_CLIENT_SECRET, QEET_ID_SECRET, QEET_ID_APP_URL]
+  optional: [QEET_ID_BASE_URL, QEET_ID_REDIRECT_URI, QEET_ID_POST_LOGOUT_REDIRECT_URI, QEET_ID_SCOPES, QEET_ID_API_KEY]
+
+commands:
+  install: bun install
+  check:   bun run verify    # typecheck + biome + test + build + publint + attw — the gate
+  build:   bun run build
+  test:    bun run test
+
+ci:
+  workflows: [ci.yml, codeql.yml, lint.yml, release.yml, security.yml]
+  matrix: ["22", "24", "26"]
+  unpublished_dependencies: .github/actions/link-qeet-id-packages builds and bun-links @qeet-id/node and @qeet-id/react (package.json resolutions)
+  release: workflow_dispatch on main -> refuse while linked -> bump package.json -> gate -> npm publish --provenance -> tag vX.Y.Z
+
+security:
+  sensitive_paths:
+    - src/session/crypto.ts     # AES-256-GCM, HKDF, AAD
+    - src/routes.ts             # state, CSRF, return paths, error envelope
+    - src/oidc.ts               # issuer, ID token, renewal, revocation
+    - src/session/cookies.ts    # names, prefixes, attributes, chunking
+  never: [send a token to the browser, renew where the cookie can't be written, answer with CORS headers, redirect to an unchecked path, log a token]
+
+llm_context:
+  primary_instructions: AGENTS.md
+  canonical: docs/llm/context.md
+  boundaries: docs/llm/boundaries.md
+  workflows: docs/llm/workflows.md
+  architecture_map: docs/llm/architecture-map.md
+  practices: docs/engineering-practices.md
+  adapters: [CLAUDE.md, GEMINI.md, .github/copilot-instructions.md]
