@@ -11,10 +11,6 @@ bun run verify   # typecheck (the example too) + Biome + tests + build + publint
 
 Requires Node.js 22.12 or later and bun (`packageManager` in `package.json`).
 
-Until `@qeet-id/node` and `@qeet-id/react` are on npm, `package.json`'s `resolutions` link them by name:
-clone both, run `bun install && bun run build && bun link` in each, then `bun install` here. CI does the same
-(`.github/actions/link-qeet-id-packages`).
-
 ## Conventions
 
 - **The contract is `@qeet-id/react`'s** (`docs/session-contract.md`, `@qeet-id/react/contract`). Import its

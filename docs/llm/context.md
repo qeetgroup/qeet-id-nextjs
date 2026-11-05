@@ -9,8 +9,6 @@ checked against `qeet-id-server` (`fix/server-release-1.0`).
 `@qeet-id/nextjs` — Qeet ID for Next.js 16 App Router apps. Node.js 22.12 or later, bun, Biome,
 TypeScript 7; an ES module package (`.mjs`, `.d.mts`) built by tsdown, one file per source module.
 
-**Status: development. Not yet published to npm.**
-
 ## Architecture
 
 ```text
@@ -58,7 +56,6 @@ the package's exports and boundaries.
 
 ## Known constraints
 
-- `@qeet-id/node` and `@qeet-id/react` aren't on npm yet: `resolutions` link them; CI builds them.
 - Concurrent renewals of one session in separate server instances can still trip Qeet ID's reuse detection
   (ADR-0003).
 - Back-channel logout isn't handled: there is no server-side session store.

@@ -6,6 +6,8 @@ All notable changes to Qeet ID for Next.js are documented here. The format follo
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-11-05
+
 ### Added
 
 - **`createQeetID(options?)`**: Qeet ID for the app, from `QEET_ID_*` environment variables with options
@@ -40,3 +42,6 @@ All notable changes to Qeet ID for Next.js are documented here. The format follo
 - **`@qeet-id/nextjs/client`**: `@qeet-id/react` re-exported, with a `QeetIDProvider` that calls
   `router.refresh()` when the session changes.
 - An App Router example, type-checked with the package.
+
+[Unreleased]: https://github.com/qeetgroup/qeet-id-nextjs/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/qeetgroup/qeet-id-nextjs/releases/tag/v0.1.0
