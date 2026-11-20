@@ -17,16 +17,16 @@ build.
 | Qeet ID's API, tokens, sign-in, organisations | `qeet-id-server` |
 | HTTP to Qeet ID, token verification, the management calls | `qeet-id-node` |
 | The same for TanStack Start | `qeet-id-tanstack` |
-| Organization / product standards | `qeet-context` (L0) / `qeet-id-context` (L1) |
+| Organization / product standards | `qeet-context` (L0) / `qeet-id-files` (L1) |
 
 **This package never adds behaviour Qeet ID lacks.** A missing parameter or flow is server work, and the
 contract records it as reserved.
 
 ## Consumes
 
-Qeet ID over HTTPS, through `@qeet-id/node`: discovery and JWKS, `/v1/oauth/token-code` (authorization code
+Qeet ID over HTTPS, through `@qeet-id/node`: discovery and JWKS, `/v1/oauth/token` (authorization code
 and refresh grants, `client_secret_post`), `/oauth/revoke`, the end-session address (browser navigation), and
-with an API key `GET /v1/tenants/{id}` and `GET /v1/users/{id}/tenants/{id}/permissions`. Next.js's
+with an API key `GET /v1/organizations/{id}` and `GET /v1/users/{id}/organizations/{id}/permissions`. Next.js's
 `next/server`, `next/headers` and `next/navigation`.
 
 ## Provides

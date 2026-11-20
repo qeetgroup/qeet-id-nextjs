@@ -110,7 +110,7 @@ QEET_ID_APP_URL=http://localhost:3000
 | `QEET_ID_REDIRECT_URI` | | `{APP_URL}/auth/callback` | Only when the public callback address differs, such as behind a rewrite. Same origin as the app |
 | `QEET_ID_POST_LOGOUT_REDIRECT_URI` | | `{APP_URL}/` | Where Qeet ID sends people after signing out |
 | `QEET_ID_SCOPES` | | `openid profile email offline_access` | Space-separated; `openid` is required. `offline_access` asks for the refresh token |
-| `QEET_ID_API_KEY` | | | A server-side API key with `tenant.read` and `role.read`, to add the organisation's name and the person's roles and permissions to the session |
+| `QEET_ID_API_KEY` | | | A server-side API key with `organization.read` and `role.read`, to add the organization's name and the person's roles and permissions to the session |
 
 Every variable is also an option of `createQeetID()`, which wins over the environment; `basePath` (default
 `/auth`) and `sessionMaxAgeSeconds` (default 7 days) are options only. A missing or invalid setting throws a
@@ -228,7 +228,7 @@ const session = await qeetId.getSession(); // Session | null
 | `user.id` | string | the ID token's `sub` |
 | `user.email` · `user.emailVerified` | string \| null · boolean | `email`, `email_verified` (the `email` scope) |
 | `user.name` · `user.picture` | string \| null | `name`, `picture` (the `profile` scope), when the person has them |
-| `organization` | `{ id, name }` \| null | `tenant_id`; `name` with `QEET_ID_API_KEY` |
+| `organization` | `{ id, name }` \| null | `organization_id`; `name` with `QEET_ID_API_KEY` |
 | `roles` · `permissions` | string[] | role names and permission keys, with `QEET_ID_API_KEY`; otherwise `[]` |
 | `expiresAt` | ISO 8601 string | when the session ends unless renewed |
 
@@ -270,10 +270,10 @@ Never send the access token to the browser.
 
 ## 🏢 Organisations
 
-Qeet ID signs people in to **the application's own organisation**: an application's tokens always carry its
-organisation's `tenant_id`, and a person who isn't a member is refused. So `session.organization` is that
-organisation, and `POST /auth/switch-organization` answers `501 organization_switch_unavailable` for any other.
-With `QEET_ID_API_KEY` the session also carries the organisation's name and the person's role names and
+Qeet ID signs people in to **the application's own organization**: an application's tokens always carry its
+organization's `organization_id`, and a person who isn't a member is refused. So `session.organization` is that
+organization, and `POST /auth/switch-organization` answers `501 organization_switch_unavailable` for any other.
+With `QEET_ID_API_KEY` the session also carries the organization's name and the person's role names and
 permission keys there, looked up at sign-in and at each renewal.
 
 ## 🚪 Signing out

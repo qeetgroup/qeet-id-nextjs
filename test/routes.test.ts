@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseSession } from "@qeet-id/react/contract";
 import { APP_URL, CookieJar, get, post, signIn, testQeetID } from "./helpers/browser.js";
-import { BASE_URL, CLIENT_ID, ISSUER, MEERA, TENANT_ID, type FakeQeetID, fakeQeetID } from "./helpers/fake-qeet-id.js";
+import { BASE_URL, CLIENT_ID, ISSUER, MEERA, ORGANIZATION_ID, type FakeQeetID, fakeQeetID } from "./helpers/fake-qeet-id.js";
 import type { QeetIDNext } from "../src/index.js";
 
 const SESSION_COOKIE = "__Host-Http-qeet-id-session";
@@ -60,7 +60,7 @@ describe("GET /auth/sign-in", () => {
   });
 
   it("starts the same request for sign-up, and ignores the reserved organization and loginHint", async () => {
-    const response = await qeetId.handlers.GET(get(`/auth/sign-up?organization=${TENANT_ID}&loginHint=meera%40brightleaffoods.in`));
+    const response = await qeetId.handlers.GET(get(`/auth/sign-up?organization=${ORGANIZATION_ID}&loginHint=meera%40brightleaffoods.in`));
     expect(response.status).toBe(302);
     const location = new URL(response.headers.get("location") ?? "");
     expect(location.pathname).toBe("/v1/oauth/authorize");
@@ -82,7 +82,7 @@ describe("GET /auth/callback", () => {
     expect(cookie).toMatchObject({ path: "/", httpOnly: true, secure: true, sameSite: "Lax", maxAge: 604800 });
     // The sign-in cookie is gone.
     expect(jar.names().filter((name) => name.includes("sign-in"))).toEqual([]);
-    const [exchange] = qeet.callsTo("POST /v1/oauth/token-code");
+    const [exchange] = qeet.callsTo("POST /v1/oauth/token");
     expect(exchange?.form?.get("grant_type")).toBe("authorization_code");
     expect(exchange?.form?.get("code_verifier")).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(exchange?.form?.get("redirect_uri")).toBe(`${APP_URL}/auth/callback`);
@@ -105,7 +105,7 @@ describe("GET /auth/callback", () => {
     // Another browser, without the sign-in cookie.
     const response = await qeetId.handlers.GET(new Request(callbackUrl));
     expect(response.headers.get("location")).toBe(`${APP_URL}/?authError=invalid_state`);
-    expect(qeet.callsTo("POST /v1/oauth/token-code")).toHaveLength(0);
+    expect(qeet.callsTo("POST /v1/oauth/token")).toHaveLength(0);
   });
 
   it("refuses a callback whose state doesn't match the cookie's", async () => {
@@ -136,11 +136,11 @@ describe("GET /auth/callback", () => {
     callbackUrl.searchParams.set("iss", "https://attacker.example");
     const response = await qeetId.handlers.GET(new Request(callbackUrl, { headers: { cookie: jar.header() } }));
     expect(response.headers.get("location")).toBe(`${APP_URL}/invoices?authError=invalid_state`);
-    expect(qeet.callsTo("POST /v1/oauth/token-code")).toHaveLength(0);
+    expect(qeet.callsTo("POST /v1/oauth/token")).toHaveLength(0);
   });
 
   it("refuses an ID token whose nonce isn't this sign-in's", async () => {
-    qeet.override("POST /v1/oauth/token-code", async () => {
+    qeet.override("POST /v1/oauth/token", async () => {
       const now = Math.floor(Date.now() / 1000);
       const idToken = await qeet.sign({ iss: ISSUER, sub: MEERA.sub, aud: CLIENT_ID, iat: now, exp: now + 600, nonce: "someone-elses" });
       return Response.json({ access_token: "at", id_token: idToken, token_type: "Bearer", expires_in: 600 });
@@ -179,7 +179,7 @@ describe("GET /auth/callback", () => {
   });
 
   it("reports session_unavailable when the code can't be exchanged", async () => {
-    qeet.override("POST /v1/oauth/token-code", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
+    qeet.override("POST /v1/oauth/token", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
     const { location } = await signIn(qeetId, qeet, { returnTo: "/invoices" });
     expect(location).toBe(`${APP_URL}/invoices?authError=session_unavailable`);
   });
@@ -213,7 +213,7 @@ describe("GET /auth/session", () => {
         name: "Meera Iyer",
         picture: "https://cdn.brightleaffoods.in/people/meera.png",
       },
-      organization: { id: TENANT_ID, name: null },
+      organization: { id: ORGANIZATION_ID, name: null },
       roles: [],
       permissions: [],
     });
@@ -226,24 +226,26 @@ describe("GET /auth/session", () => {
     const { jar } = await signIn(qeetId, qeet);
     const body = await json(await qeetId.handlers.GET(get("/auth/session", jar)));
     expect(body.session).toMatchObject({
-      organization: { id: TENANT_ID, name: "Brightleaf Foods" },
+      organization: { id: ORGANIZATION_ID, name: "Brightleaf Foods" },
       roles: ["Finance approver"],
       permissions: ["invoice.approve", "invoice.read"],
     });
-    expect(qeet.callsTo(`GET /v1/tenants/${TENANT_ID}`)[0]?.headers.get("authorization")).toBe("ApiKey qk_test_key");
+    expect(qeet.callsTo(`GET /v1/organizations/${ORGANIZATION_ID}`)[0]?.headers.get("authorization")).toBe("ApiKey qk_test_key");
   });
 
   it("signs in without the lookups when they fail", async () => {
     qeetId = testQeetID(qeet, { apiKey: "qk_test_key" });
-    qeet.override(`GET /v1/tenants/${TENANT_ID}`, () => Response.json({ error: { code: "forbidden", message: "no" } }, { status: 403 }));
-    qeet.override(`GET /v1/users/${MEERA.sub}/tenants/${TENANT_ID}/permissions`, () => new Response("down", { status: 503 }));
+    qeet.override(`GET /v1/organizations/${ORGANIZATION_ID}`, () =>
+      Response.json({ error: { code: "forbidden", message: "no" } }, { status: 403 }),
+    );
+    qeet.override(`GET /v1/users/${MEERA.sub}/organizations/${ORGANIZATION_ID}/permissions`, () => new Response("down", { status: 503 }));
     const { jar } = await signIn(qeetId, qeet);
     const body = await json(await qeetId.handlers.GET(get("/auth/session", jar)));
-    expect(body.session).toMatchObject({ organization: { id: TENANT_ID, name: null }, roles: [], permissions: [] });
+    expect(body.session).toMatchObject({ organization: { id: ORGANIZATION_ID, name: null }, roles: [], permissions: [] });
   });
 
   it("maps missing claims to null, and emailVerified to false without an email", async () => {
-    const { jar } = await signIn(qeetId, qeet, { user: { sub: "c3a1", tenant_id: TENANT_ID } });
+    const { jar } = await signIn(qeetId, qeet, { user: { sub: "c3a1", organization_id: ORGANIZATION_ID } });
     const body = await json(await qeetId.handlers.GET(get("/auth/session", jar)));
     expect(body.session.user).toEqual({ id: "c3a1", email: null, emailVerified: false, name: null, picture: null });
   });
@@ -318,16 +320,16 @@ describe("POST /auth/sign-out", () => {
 
 describe("POST /auth/switch-organization", () => {
   it("answers 401 not_signed_in without a session", async () => {
-    const response = await qeetId.handlers.POST(post("/auth/switch-organization", undefined, { organizationId: TENANT_ID }));
+    const response = await qeetId.handlers.POST(post("/auth/switch-organization", undefined, { organizationId: ORGANIZATION_ID }));
     expect(response.status).toBe(401);
     expect(await json(response)).toEqual({ error: { code: "not_signed_in", message: expect.any(String) } });
   });
 
   it("answers the session when it is already in that organisation", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    const response = await qeetId.handlers.POST(post("/auth/switch-organization", jar, { organizationId: TENANT_ID }));
+    const response = await qeetId.handlers.POST(post("/auth/switch-organization", jar, { organizationId: ORGANIZATION_ID }));
     expect(response.status).toBe(200);
-    expect((await json(response)).session.organization.id).toBe(TENANT_ID);
+    expect((await json(response)).session.organization.id).toBe(ORGANIZATION_ID);
   });
 
   it("answers 501 organization_switch_unavailable for another organisation", async () => {
@@ -353,7 +355,7 @@ describe("CSRF", () => {
   ])("refuses a POST with %s: 403 csrf_rejected", async (_label, headers) => {
     const { jar } = await signIn(qeetId, qeet);
     for (const path of ["/auth/sign-out", "/auth/switch-organization"]) {
-      const response = await qeetId.handlers.POST(post(path, jar, { organizationId: TENANT_ID }, headers));
+      const response = await qeetId.handlers.POST(post(path, jar, { organizationId: ORGANIZATION_ID }, headers));
       expect(response.status).toBe(403);
       expectNoStore(response);
       expect((await json(response)).error.code).toBe("csrf_rejected");
@@ -387,7 +389,7 @@ describe("routing", () => {
     const callbackUrl = qeet.authorize(start.headers.get("location") ?? "");
     const head = await qeetId.handlers.GET(new Request(callbackUrl, { method: "HEAD", headers: { cookie: jar.header() } }));
     expect(head.status).toBe(405);
-    expect(qeet.callsTo("POST /v1/oauth/token-code")).toHaveLength(0);
+    expect(qeet.callsTo("POST /v1/oauth/token")).toHaveLength(0);
     const response = await qeetId.handlers.GET(new Request(callbackUrl, { headers: { cookie: jar.header() } }));
     expect(response.headers.get("location")).toBe(`${APP_URL}/`);
   });

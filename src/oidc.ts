@@ -265,15 +265,15 @@ export class Oidc {
   ): Promise<StoredSession> {
     // A renewal without an ID token keeps what the session knew.
     const user = claims === undefined && previous !== null ? previous.user : userFrom(claims ?? {});
-    const tenantId = claims === undefined ? (previous?.organization?.id ?? null) : stringOrNull(claims.tenant_id);
+    const organizationId = claims === undefined ? (previous?.organization?.id ?? null) : stringOrNull(claims.organization_id);
     const accessTokenExpiresAt = now + Math.max(0, tokens.expires_in) * 1000;
     const refreshToken = typeof tokens.refresh_token === "string" ? tokens.refresh_token : null;
-    const known = previous?.organization?.id === tenantId ? previous : null;
-    const details = tenantId === null ? null : await this.#details(tenantId, user.id);
+    const known = previous?.organization?.id === organizationId ? previous : null;
+    const details = organizationId === null ? null : await this.#details(organizationId, user.id);
     return {
       v: 1,
       user,
-      organization: tenantId === null ? null : { id: tenantId, name: details?.name ?? known?.organization?.name ?? null },
+      organization: organizationId === null ? null : { id: organizationId, name: details?.name ?? known?.organization?.name ?? null },
       roles: details?.roles ?? known?.roles ?? [],
       permissions: details?.permissions ?? known?.permissions ?? [],
       accessToken: tokens.access_token,
@@ -285,17 +285,17 @@ export class Oidc {
   }
 
   /** The organisation's name and the person's roles and permissions, with the API key; `null` without one or when both lookups fail. */
-  async #details(tenantId: string, userId: string): Promise<OrganizationDetails | null> {
+  async #details(organizationId: string, userId: string): Promise<OrganizationDetails | null> {
     if (this.#config.apiKey === undefined) return null;
     const options = { timeoutMs: LOOKUP_TIMEOUT_MS, maxRetries: 0 };
-    const [tenant, access] = await Promise.allSettled([
-      this.#client.tenants.get(tenantId, options),
-      this.#client.permissions.listEffective(tenantId, userId, options),
+    const [organization, access] = await Promise.allSettled([
+      this.#client.organizations.get(organizationId, options),
+      this.#client.permissions.listEffective(organizationId, userId, options),
     ]);
-    if (tenant.status === "rejected" && access.status === "rejected") return null;
+    if (organization.status === "rejected" && access.status === "rejected") return null;
     const roles = access.status === "fulfilled" ? access.value.grants.map((grant) => grant.role_name).filter(isText) : [];
     return {
-      name: tenant.status === "fulfilled" && isText(tenant.value.name) ? tenant.value.name : null,
+      name: organization.status === "fulfilled" && isText(organization.value.name) ? organization.value.name : null,
       roles: [...new Set(roles)].sort(),
       permissions: access.status === "fulfilled" ? [...new Set(access.value.permissions.filter(isText))].sort() : [],
     };

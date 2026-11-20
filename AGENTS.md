@@ -16,7 +16,7 @@ It implements two contracts it does not own:
 
 - **The session contract**: `@qeet-id/react`'s `docs/session-contract.md` and `src/contract.ts`
   (`@qeet-id/react/contract`), imported here, never copied.
-- **Qeet ID's API**: `qeet-id-server`'s `api/openapi/{federation,auth,management}.yaml`, with its handlers
+- **Qeet ID's API**: `qeet-id-server`'s `api/openapi/{federation,access,identity}.yaml`, with its handlers
   (`internal/federation/oidc/`) as the tiebreaker. Never send a parameter the server doesn't take.
 
 ## Read before changing code

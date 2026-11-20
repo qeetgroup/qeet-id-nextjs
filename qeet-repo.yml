@@ -1,5 +1,5 @@
 # qeet-id-nextjs — repository context metadata (Level 2).
-# Inherits qeetgroup/qeet-context (L0) and qeetgroup/qeet-id-context (L1).
+# Inherits qeetgroup/qeet-context (L0) and qeetgroup/qeet-id-files (L1).
 
 schema_version: 1
 
@@ -7,7 +7,7 @@ context: {type: repository, level: L2, canonical: true, last_verified: "2026-11-
 
 inheritance:
   organization: {repository: qeetgroup/qeet-context, level: L0}
-  product:      {repository: qeetgroup/qeet-id-context, level: L1}
+  product:      {repository: qeetgroup/qeet-id-files, level: L1}
 
 repository:
   name: qeet-id-nextjs
@@ -28,7 +28,7 @@ runtime:
   runtime_deps: ["@qeet-id/node", "@qeet-id/react", server-only]
   build: tsdown              # ES module only (.mjs/.d.mts), one file per module (ADR-0004)
 
-module: {name: "@qeet-id/nextjs", version: "0.1.0", entries: [".", "./client"]}
+module: {name: "@qeet-id/nextjs", version: "0.2.0", entries: [".", "./client"]}
 
 architecture:
   factory: createQeetID              # env QEET_ID_* + options -> handlers, proxy, getSession, requireSession, getAccessToken
@@ -46,7 +46,7 @@ contracts:
     import: "@qeet-id/react/contract"
   consumes:
     api: qeet-id-server
-    documents: [api/openapi/federation.yaml, api/openapi/auth.yaml, api/openapi/management.yaml]
+    documents: [api/openapi/federation.yaml, api/openapi/access.yaml, api/openapi/identity.yaml]
     tiebreaker: internal/federation/oidc/
     base_url: https://api.id.qeet.in
     through: "@qeet-id/node"

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type CookieJar, signIn, testQeetID } from "./helpers/browser.js";
-import { MEERA, TENANT_ID, type FakeQeetID, fakeQeetID } from "./helpers/fake-qeet-id.js";
+import { MEERA, ORGANIZATION_ID, type FakeQeetID, fakeQeetID } from "./helpers/fake-qeet-id.js";
 import { AccessTokenError, type QeetIDNext, QeetIDError, RETURN_TO_HEADER } from "../src/index.js";
 
 /** What next/headers sees: the request's cookies and headers, and whether cookies may be set here. */
@@ -74,7 +74,7 @@ describe("getSession", () => {
     useJar((await signIn(qeetId, qeet)).jar);
     const calls = qeet.calls.length;
     const session = await qeetId.getSession();
-    expect(session).toMatchObject({ user: { id: MEERA.sub, name: "Meera Iyer" }, organization: { id: TENANT_ID } });
+    expect(session).toMatchObject({ user: { id: MEERA.sub, name: "Meera Iyer" }, organization: { id: ORGANIZATION_ID } });
     expect(qeet.calls.length).toBe(calls);
     expect(request.sets).toEqual([]);
   });
@@ -144,12 +144,12 @@ describe("getAccessToken", () => {
     vi.setSystemTime(START + 601_000);
     const error = await qeetId.getAccessToken().catch((caught: unknown) => caught);
     expect((error as AccessTokenError).code).toBe("cookies_read_only");
-    expect(qeet.callsTo("POST /v1/oauth/token-code").filter((call) => call.form?.get("grant_type") === "refresh_token")).toHaveLength(0);
+    expect(qeet.callsTo("POST /v1/oauth/token").filter((call) => call.form?.get("grant_type") === "refresh_token")).toHaveLength(0);
   });
 
   it("throws session_ended and clears the cookie when Qeet ID refuses the renewal", async () => {
     useJar((await signIn(qeetId, qeet)).jar);
-    qeet.override("POST /v1/oauth/token-code", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
+    qeet.override("POST /v1/oauth/token", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
     vi.setSystemTime(START + 590_000);
     const error = await qeetId.getAccessToken().catch((caught: unknown) => caught);
     expect((error as AccessTokenError).code).toBe("session_ended");
@@ -158,7 +158,7 @@ describe("getAccessToken", () => {
 
   it("hands out a still-valid token when Qeet ID can't be reached, and throws session_unavailable once it expires", async () => {
     useJar((await signIn(qeetId, qeet)).jar);
-    qeet.override("POST /v1/oauth/token-code", () => new Response("down", { status: 503 }));
+    qeet.override("POST /v1/oauth/token", () => new Response("down", { status: 503 }));
     vi.setSystemTime(START + 590_000);
     expect(await qeetId.getAccessToken()).toMatch(/\./);
     vi.setSystemTime(START + 601_000);
