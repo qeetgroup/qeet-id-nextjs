@@ -17,7 +17,7 @@ build.
 | Qeet ID's API, tokens, sign-in, organisations | `qeet-id-server` |
 | HTTP to Qeet ID, token verification, the management calls | `qeet-id-node` |
 | The same for TanStack Start | `qeet-id-tanstack` |
-| Organization / product standards | `qeet-context` (L0) / `qeet-id-context` (L1) |
+| Organization / product standards | `qeet-context` (L0) / `qeet-id-files` (L1) |
 
 **This package never adds behaviour Qeet ID lacks.** A missing parameter or flow is server work, and the
 contract records it as reserved.
