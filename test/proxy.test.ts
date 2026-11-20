@@ -98,7 +98,7 @@ describe("qeetId.proxy()", () => {
 
   it("clears an ended session and then treats the visitor as signed out", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    qeet.override("POST /v1/oauth/token-code", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
+    qeet.override("POST /v1/oauth/token", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
     vi.setSystemTime(START + 590_000);
     const response = await qeetId.proxy({ protect: ["/dashboard"] })(request("/dashboard", jar));
     expect(response.status).toBe(307);
@@ -116,7 +116,7 @@ describe("qeetId.proxy()", () => {
 
   it("keeps the session when Qeet ID can't be reached", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    qeet.override("POST /v1/oauth/token-code", () => new Response("down", { status: 503 }));
+    qeet.override("POST /v1/oauth/token", () => new Response("down", { status: 503 }));
     vi.setSystemTime(START + 610_000);
     const response = await qeetId.proxy({ protect: ["/dashboard"] })(request("/dashboard", jar));
     expect(response.headers.get("x-middleware-next")).toBe("1");
@@ -129,6 +129,6 @@ describe("qeetId.proxy()", () => {
     const response = await qeetId.proxy({ protect: () => true })(request("/auth/session", jar));
     expect(response.headers.get("x-middleware-next")).toBe("1");
     expect(response.headers.getSetCookie()).toEqual([]);
-    expect(qeet.callsTo("POST /v1/oauth/token-code").filter((call) => call.form?.get("grant_type") === "refresh_token")).toHaveLength(0);
+    expect(qeet.callsTo("POST /v1/oauth/token").filter((call) => call.form?.get("grant_type") === "refresh_token")).toHaveLength(0);
   });
 });

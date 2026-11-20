@@ -9,7 +9,7 @@ export const BASE_URL = "https://api.id.qeet.test";
 export const ISSUER = "https://api.id.qeet.test";
 export const CLIENT_ID = "app_brightleaf_web";
 export const CLIENT_SECRET = "secret_for_tests_only";
-export const TENANT_ID = "5f0c1d2e-3a4b-4c5d-8e9f-0a1b2c3d4e5f";
+export const ORGANIZATION_ID = "5f0c1d2e-3a4b-4c5d-8e9f-0a1b2c3d4e5f";
 
 export interface FakeUser {
   sub: string;
@@ -17,7 +17,7 @@ export interface FakeUser {
   email_verified?: boolean;
   name?: string;
   picture?: string;
-  tenant_id?: string;
+  organization_id?: string;
 }
 
 export const MEERA: FakeUser = {
@@ -26,7 +26,7 @@ export const MEERA: FakeUser = {
   email_verified: true,
   name: "Meera Iyer",
   picture: "https://cdn.brightleaffoods.in/people/meera.png",
-  tenant_id: TENANT_ID,
+  organization_id: ORGANIZATION_ID,
 };
 
 export interface RecordedCall {
@@ -94,7 +94,7 @@ export async function fakeQeetID(): Promise<FakeQeetID> {
     const now = Math.floor(Date.now() / 1000);
     const idClaims: Record<string, unknown> = { iss: ISSUER, sub: user.sub, aud: CLIENT_ID, iat: now, exp: now + fake.accessTokenSeconds };
     if (nonce) idClaims.nonce = nonce;
-    for (const key of ["email", "email_verified", "name", "picture", "tenant_id"] as const) {
+    for (const key of ["email", "email_verified", "name", "picture", "organization_id"] as const) {
       if (user[key] !== undefined) idClaims[key] = user[key];
     }
     const body: Record<string, unknown> = {
@@ -135,7 +135,7 @@ export async function fakeQeetID(): Promise<FakeQeetID> {
       return Response.json({
         issuer: ISSUER,
         authorization_endpoint: `${BASE_URL}/v1/oauth/authorize`,
-        token_endpoint: `${BASE_URL}/v1/oauth/token-code`,
+        token_endpoint: `${BASE_URL}/v1/oauth/token`,
         jwks_uri: `${BASE_URL}/.well-known/jwks.json`,
         end_session_endpoint: `${BASE_URL}/v1/oauth/logout`,
         revocation_endpoint: `${BASE_URL}/oauth/revoke`,
@@ -146,7 +146,7 @@ export async function fakeQeetID(): Promise<FakeQeetID> {
     if (route === "GET /.well-known/jwks.json") {
       return Response.json({ keys: [{ kty: "EC", crv: "P-256", x: jwk.x, y: jwk.y, kid, use: "sig", alg: "ES256" }] });
     }
-    if (route === "POST /v1/oauth/token-code") {
+    if (route === "POST /v1/oauth/token") {
       const form = call.form ?? new URLSearchParams();
       if (form.get("client_id") !== CLIENT_ID || form.get("client_secret") !== CLIENT_SECRET) return oauthError("invalid_client", 401);
       if (form.get("grant_type") === "authorization_code") {
@@ -175,10 +175,10 @@ export async function fakeQeetID(): Promise<FakeQeetID> {
       if (issued) issued.revoked = true;
       return new Response(null, { status: 200 });
     }
-    if (route === `GET /v1/tenants/${TENANT_ID}`) {
-      return Response.json({ id: TENANT_ID, slug: "brightleaf-foods", name: "Brightleaf Foods" });
+    if (route === `GET /v1/organizations/${ORGANIZATION_ID}`) {
+      return Response.json({ id: ORGANIZATION_ID, slug: "brightleaf-foods", name: "Brightleaf Foods" });
     }
-    if (route === `GET /v1/users/${MEERA.sub}/tenants/${TENANT_ID}/permissions`) {
+    if (route === `GET /v1/users/${MEERA.sub}/organizations/${ORGANIZATION_ID}/permissions`) {
       return Response.json({
         permissions: ["invoice.read", "invoice.approve", "invoice.read"],
         grants: [

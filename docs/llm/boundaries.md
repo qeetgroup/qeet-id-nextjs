@@ -24,9 +24,9 @@ contract records it as reserved.
 
 ## Consumes
 
-Qeet ID over HTTPS, through `@qeet-id/node`: discovery and JWKS, `/v1/oauth/token-code` (authorization code
+Qeet ID over HTTPS, through `@qeet-id/node`: discovery and JWKS, `/v1/oauth/token` (authorization code
 and refresh grants, `client_secret_post`), `/oauth/revoke`, the end-session address (browser navigation), and
-with an API key `GET /v1/tenants/{id}` and `GET /v1/users/{id}/tenants/{id}/permissions`. Next.js's
+with an API key `GET /v1/organizations/{id}` and `GET /v1/users/{id}/organizations/{id}/permissions`. Next.js's
 `next/server`, `next/headers` and `next/navigation`.
 
 ## Provides

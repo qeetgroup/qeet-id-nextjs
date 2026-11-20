@@ -26,7 +26,7 @@ async function session(jar: CookieJar): Promise<{ response: Response; body: any 
   return { response, body: JSON.parse(await response.clone().text()) };
 }
 
-const refreshes = () => qeet.callsTo("POST /v1/oauth/token-code").filter((call) => call.form?.get("grant_type") === "refresh_token");
+const refreshes = () => qeet.callsTo("POST /v1/oauth/token").filter((call) => call.form?.get("grant_type") === "refresh_token");
 
 describe("renewal at GET /auth/session", () => {
   it("leaves a fresh access token alone", async () => {
@@ -56,7 +56,7 @@ describe("renewal at GET /auth/session", () => {
 
   it("ends the session when Qeet ID refuses the refresh token", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    qeet.override("POST /v1/oauth/token-code", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
+    qeet.override("POST /v1/oauth/token", () => Response.json({ error: "invalid_grant" }, { status: 400 }));
     vi.setSystemTime(START + 590_000);
     const { response, body } = await session(jar);
     expect(body).toEqual({ session: null });
@@ -66,7 +66,7 @@ describe("renewal at GET /auth/session", () => {
 
   it("keeps the session while the access token lasts when Qeet ID can't be reached", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    qeet.override("POST /v1/oauth/token-code", () => new Response("bad gateway", { status: 502 }));
+    qeet.override("POST /v1/oauth/token", () => new Response("bad gateway", { status: 502 }));
     vi.setSystemTime(START + 570_000);
     const usable = await session(jar);
     expect(usable.response.status).toBe(200);
@@ -137,7 +137,7 @@ describe("renewal at GET /auth/session", () => {
 
   it("keeps the user from the session when a renewal returns no ID token", async () => {
     const { jar } = await signIn(qeetId, qeet);
-    qeet.override("POST /v1/oauth/token-code", (call) =>
+    qeet.override("POST /v1/oauth/token", (call) =>
       call.form?.get("grant_type") === "refresh_token"
         ? Response.json({ access_token: "at-2", token_type: "Bearer", expires_in: 600, refresh_token: "rt-2" })
         : undefined,

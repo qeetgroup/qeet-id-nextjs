@@ -6,6 +6,22 @@ All notable changes to Qeet ID for Next.js are documented here. The format follo
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-11-21
+
+Follows the Qeet ID API's rename of tenant to organization and its single token endpoint, through
+`@qeet-id/node` 0.2.0. The session contract, the routes and the exports are unchanged.
+
+### Changed
+
+- **Depends on `@qeet-id/node` and `@qeet-id/react` `^0.2.0`**: 0.1.0 of the node SDK calls routes
+  and reads a claim the API no longer has.
+- **The session's organization is read from the ID token's `organization_id` claim**, which
+  replaced `tenant_id`. Its name comes from `organizations.get` (`GET /v1/organizations/{organizationID}`)
+  and the roles and permissions from `GET /v1/users/{userID}/organizations/{organizationID}/permissions`.
+  `QEET_ID_API_KEY` needs `organization.read` (it was `tenant.read`) and `role.read`.
+- **The code exchange and renewals post to `/v1/oauth/token`**, the API's one token endpoint (they
+  posted to `/v1/oauth/token-code`, which is gone).
+
 ## [0.1.0] — 2026-11-05
 
 ### Added
@@ -43,5 +59,6 @@ All notable changes to Qeet ID for Next.js are documented here. The format follo
   `router.refresh()` when the session changes.
 - An App Router example, type-checked with the package.
 
-[Unreleased]: https://github.com/qeetgroup/qeet-id-nextjs/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/qeetgroup/qeet-id-nextjs/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/qeetgroup/qeet-id-nextjs/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/qeetgroup/qeet-id-nextjs/releases/tag/v0.1.0

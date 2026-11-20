@@ -1,6 +1,6 @@
 {
   "name": "@qeet-id/nextjs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Sign-in with Qeet ID for Next.js: the session routes, an encrypted cookie session, route protection and server helpers. Tokens stay on your server.",
   "author": "Qeet Group",
   "homepage": "https://github.com/qeetgroup/qeet-id-nextjs#readme",
@@ -67,8 +67,8 @@
     "prepublishOnly": "bun run verify"
   },
   "dependencies": {
-    "@qeet-id/node": "^0.1.0 || ^1.0.0",
-    "@qeet-id/react": "^0.1.0 || ^1.0.0",
+    "@qeet-id/node": "^0.2.0",
+    "@qeet-id/react": "^0.2.0",
     "server-only": "^0.0.1"
   },
   "peerDependencies": {
